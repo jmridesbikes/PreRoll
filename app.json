@@ -1,30 +1,57 @@
 {
   "expo": {
-    "name": "ClipStart",
-    "slug": "ClipStart",
+    "name": "PreRoll",
+    "slug": "preroll",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#0a0a0a"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.preroll.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "PreRoll needs the camera to show a preview and record after the countdown.",
+        "NSMicrophoneUsageDescription": "PreRoll needs the microphone to record audio with your videos.",
+        "NSPhotoLibraryAddUsageDescription": "PreRoll saves your recorded clips to your photo library.",
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#0a0a0a"
       },
+      "package": "com.preroll.app",
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": ["VIBRATE"]
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "PreRoll needs camera access to record after the countdown finishes.",
+          "microphonePermission": "PreRoll needs microphone access to record audio with your videos.",
+          "recordAudioAndroid": true
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "PreRoll saves your clips to your photo library.",
+          "savePhotosPermission": "PreRoll saves your recordings to your gallery.",
+          "isAccessMediaLocationEnabled": true
+        }
+      ]
+    ]
   }
 }
