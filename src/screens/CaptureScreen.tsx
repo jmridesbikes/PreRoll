@@ -9,7 +9,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { CameraView } from 'expo-camera';
+import { CameraView, type FlashMode } from 'expo-camera';
 import * as Haptics from 'expo-haptics';
 import { useKeepAwake } from 'expo-keep-awake';
 
@@ -22,6 +22,13 @@ import {
 } from '../lib/saveToLibrary';
 import type { CaptureSession } from '../types/session';
 import { colors } from '../theme/colors';
+
+function cameraFlashForSession(session: CaptureSession): FlashMode {
+  if (session.mediaMode !== 'picture') {
+    return 'off';
+  }
+  return session.photoFlashMode;
+}
 
 type Props = {
   session: CaptureSession;
@@ -104,8 +111,13 @@ export function CaptureScreen({ session, onDone }: Props) {
   }, [phase, onDone]);
 
   useEffect(() => {
-    const rearCountdown =
-      cameraReady && phase === 'countdown' && session.facing === 'back';
+    const allowCountdownPulse =
+      session.facing === 'back' &&
+      (session.mediaMode === 'video'
+        ? !session.videoSolidTorch
+        : session.photoFlashMode === 'off');
+
+    const rearCountdown = cameraReady && phase === 'countdown' && allowCountdownPulse;
     if (!rearCountdown) {
       setTorchPulseOn(false);
       return;
@@ -129,7 +141,14 @@ export function CaptureScreen({ session, onDone }: Props) {
       if (offTimeout) clearTimeout(offTimeout);
       setTorchPulseOn(false);
     };
-  }, [cameraReady, phase, session.facing]);
+  }, [
+    cameraReady,
+    phase,
+    session.facing,
+    session.mediaMode,
+    session.videoSolidTorch,
+    session.photoFlashMode,
+  ]);
 
   useEffect(() => {
     if (!cameraReady || phase !== 'countdown') return;
@@ -220,8 +239,22 @@ export function CaptureScreen({ session, onDone }: Props) {
   }
 
   const cameraMode = session.mediaMode === 'video' ? 'video' : 'picture';
-  const enableTorch =
-    phase === 'countdown' && session.facing === 'back' && torchPulseOn;
+  const solidVideoTorch =
+    session.mediaMode === 'video' &&
+    session.videoSolidTorch &&
+    session.facing === 'back';
+
+  const allowCountdownPulse =
+    session.facing === 'back' &&
+    (session.mediaMode === 'video'
+      ? !session.videoSolidTorch
+      : session.photoFlashMode === 'off');
+
+  const enableTorch = solidVideoTorch
+    ? phase === 'countdown' || phase === 'recording'
+    : phase === 'countdown' && allowCountdownPulse && torchPulseOn;
+
+  const flashMode = cameraFlashForSession(session);
 
   return (
     <View style={styles.root}>
@@ -232,7 +265,7 @@ export function CaptureScreen({ session, onDone }: Props) {
         mode={cameraMode}
         mute={session.mediaMode === 'picture'}
         enableTorch={enableTorch}
-        flash="off"
+        flash={flashMode}
         videoQuality="720p"
         responsiveOrientationWhenOrientationLocked
         onCameraReady={() => setCameraReady(true)}
