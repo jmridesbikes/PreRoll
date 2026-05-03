@@ -6,10 +6,11 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "build:android": "eas build --platform android --profile production"
   },
   "dependencies": {
-    "expo": "~54.0.33",
+    "expo": "~54.0.34",
     "expo-av": "~16.0.8",
     "expo-camera": "~17.0.10",
     "expo-haptics": "~15.0.8",
